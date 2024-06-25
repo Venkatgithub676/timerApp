@@ -4,23 +4,32 @@ import {Component} from 'react'
 import './index.css'
 
 class DigitalTimer extends Component {
-  state = {isStarted: false, timerValue: 25, min: 25, secs: 0}
+  state = {isStarted: false, timerValue: 25, min: 25, secs: 60}
 
   componentDidMount() {
-    const {secs, mins} = this.state
-    let sec = 10
-
     this.timerId = setInterval(() => {
-      if (sec <= 9 && sec >= 0) {
-        const sec1 = `0${sec}`
-        this.setState({secs: sec1})
-        sec -= 1
-      } else {
-        sec -= 1
-        this.setState({secs: sec})
-        console.log(sec)
+      let {secs, min, isStarted, timerValue} = this.state
+
+      if (isStarted) {
+        secs -= 1
+        if (secs === 0) {
+          secs = 60
+        }
+        if (secs === 59) {
+          min -= 1
+        }
       }
+      if (min === 0 && secs === 60) {
+        clearInterval(this.timerId)
+        isStarted = false
+        timerValue = 25
+        console.log(min, secs)
+      }
+      console.log(isStarted)
+      this.setState({secs, min, isStarted, timerValue})
     }, 1000)
+
+    // console.log(isStarted)
   }
 
   onClickStart = () => {
@@ -29,7 +38,8 @@ class DigitalTimer extends Component {
   }
 
   onResetBtn = () => {
-    this.setState({isStarted: false})
+    clearInterval(this.timerId)
+    this.setState({isStarted: false, secs: 60, min: 25, timerValue: 25})
   }
 
   onDecrement = () => {
@@ -47,9 +57,20 @@ class DigitalTimer extends Component {
   }
 
   render() {
-    const {isStarted, timerValue, min, secs} = this.state
+    const {isStarted, timerValue, min} = this.state
+    let {secs} = this.state
     const startOrPause = isStarted ? 'Pause' : 'Start'
     const runningOrPaused = isStarted ? 'Running' : 'Paused'
+    const playOrPauseIcon = isStarted ? 'pause icon' : 'play icon'
+    const playOrPauseImg = isStarted
+      ? 'https://assets.ccbp.in/frontend/react-js/pause-icon-img.png '
+      : 'https://assets.ccbp.in/frontend/react-js/play-icon-img.png '
+    if (secs === 60) {
+      secs = `0${0}`
+    }
+    if (secs <= 9 && secs > 0) {
+      secs = `0${secs}`
+    }
     return (
       <div className="bg-con">
         <div className="main-con">
@@ -60,7 +81,7 @@ class DigitalTimer extends Component {
                 <h1 className="timer">
                   {min}:{secs}
                 </h1>
-                <h1 className="pause">{runningOrPaused}</h1>
+                <p className="pause">{runningOrPaused}</p>
               </div>
             </div>
             <div>
@@ -72,8 +93,8 @@ class DigitalTimer extends Component {
                   id="startBtn"
                 >
                   <img
-                    src="https://assets.ccbp.in/frontend/react-js/play-icon-img.png "
-                    alt="play icon"
+                    src={playOrPauseImg}
+                    alt={playOrPauseIcon}
                     className="start-img"
                     id="start-img"
                   />
@@ -99,7 +120,7 @@ class DigitalTimer extends Component {
                 </label>
               </div>
               <div className="set-timer-limit-con">
-                <h1 className="set-timer-heading">Set Timer Limit</h1>
+                <p className="set-timer-heading">Set Timer Limit</p>
                 <div className="timer-min-max-con">
                   <button
                     onClick={this.onDecrement}
